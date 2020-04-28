@@ -1,0 +1,13 @@
+{
+  "name": "apolloStart",
+  "version": "1.0.0",
+  "description": "apollo sever express test",
+  "main": "index.js",
+  "repository": "https://github.com/miyi/apolloStart.git",
+  "author": "miyi",
+  "license": "MIT",
+  "dependencies": {
+    "global": "^4.4.0",
+    "tsc": "^1.20150623.0"
+  }
+}
