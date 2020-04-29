@@ -1,0 +1,25 @@
+{
+	"eslint.autoFixOnSave": true,
+	"eslint.validate": [
+		"javascript",
+		{
+			"language": "typescript",
+			"autoFix": true
+		},
+		{
+			"language": "typescriptreact",
+			"autoFix": true
+		}
+	],
+	"parser": "@typescript-eslint/parser",
+	"extends": "prettier/@typescript-eslint",
+	"plugins": ["@typescript-eslint/recommended", "prettier/recommended"],
+	"rules": {
+		"no-console": "off",
+		"member-access": false,
+		"object-literal-sort-keys": false,
+		"semi": ["error", "single"],
+		"quotes": [2, "single"],
+		"comma-dangle": ["error", "always"]
+	}
+}
