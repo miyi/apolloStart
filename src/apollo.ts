@@ -95,8 +95,8 @@ app.use(
   }),
 )
 
-// const corsOptions = { credentials: true, origin: '*', }
-graphqlServer.applyMiddleware({ app, cors: false, path: '/graphql' })
+const corsOptions = { credentials: true, origin: '*' }
+graphqlServer.applyMiddleware({ app, cors: corsOptions, path: '/graphql' })
 
 let httpServer = app.listen(3000, 'localhost', () => {
   console.log('Listening on port: ', httpServer.address() as AddressInfo)
