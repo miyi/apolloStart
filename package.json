@@ -7,7 +7,9 @@
   "author": "miyi",
   "license": "MIT",
   "dependencies": {
+    "@types/jest": "^25.2.1",
     "apollo-server-express": "^2.12.0",
+    "axios": "^0.19.2",
     "connect-redis": "^4.0.4",
     "cors": "^2.8.5",
     "express": "^4.17.1",
@@ -19,6 +21,7 @@
     "pg": "^8.0.3",
     "redis": "^3.0.2",
     "reflect-metadata": "^0.1.13",
+    "ts-jest": "^25.4.0",
     "tsc": "^1.20150623.0",
     "typeorm": "^0.2.24"
   },
