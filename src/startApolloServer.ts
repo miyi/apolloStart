@@ -4,9 +4,12 @@ import { ApolloServer, gql, IResolvers } from 'apollo-server-express'
 import session from 'express-session'
 import { createClient } from 'redis'
 import connectRedis from 'connect-redis'
-import { ContextIntegration } from './types/server-utils'
+import { ContextIntegration, AddressInfo } from './types/server-utils'
+import { Server, createServer } from 'http'
 
 const SESSION_SECRET = 'secretsecret'
+
+let httpServer: Server
 
 // Construct a schema, using GraphQL schema language
 const typeDefs = gql`
@@ -49,45 +52,65 @@ const resolvers: IResolvers = {
   },
 }
 
-export const ApolloExpressServer = () => {
-  const graphqlServer = new ApolloServer({
-    typeDefs,
-    resolvers,
-    context: ({ req }: ContextIntegration) => ({
-      url: req.get('host'),
-      session: req.session,
-    }),
-    playground: {
-      settings: {
-        'request.credentials': 'include',
-      },
-    },
+export const StartApolloExpressServer = (
+  port: number = 0,
+  address: string = 'localhost',
+): Promise<Server> =>
+  new Promise<Server>((resolve) => {
+    {
+      const graphqlServer = new ApolloServer({
+        typeDefs,
+        resolvers,
+        context: ({ req }: ContextIntegration) => ({
+          url: req.get('host'),
+          session: req.session,
+        }),
+        playground: {
+          settings: {
+            'request.credentials': 'include',
+          },
+        },
+      })
+
+      const RedisClient = createClient()
+      const RedisStore = connectRedis(session)
+
+      const app = express()
+      app.use(
+        session({
+          store: new RedisStore({
+            client: RedisClient as any,
+          }),
+          name: 'qid',
+          secret: SESSION_SECRET,
+          resave: false,
+          saveUninitialized: false,
+          cookie: {
+            httpOnly: false,
+            sameSite: false,
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+          },
+        }),
+      )
+
+      //for axios
+      app.set('trust proxy', 1)
+
+      const corsOptions = { credentials: true, origin: '*' }
+      graphqlServer.applyMiddleware({
+        app,
+        cors: corsOptions,
+        path: '/graphql',
+      })
+      httpServer = createServer(app)
+      httpServer.listen(port, address, () => {
+        process.env.HOST_URL =
+          (httpServer.address() as AddressInfo).address +
+          ':' +
+          (httpServer.address() as AddressInfo).port
+        console.log('listening on: ', process.env.HOST_URL)
+        resolve(httpServer)
+      })
+    }
   })
-
-  const RedisClient = createClient()
-  const RedisStore = connectRedis(session)
-
-  const app = express()
-  app.use(
-    session({
-      store: new RedisStore({
-        client: RedisClient as any,
-      }),
-      name: 'qid',
-      secret: SESSION_SECRET,
-      resave: false,
-      saveUninitialized: false,
-      cookie: {
-        httpOnly: false,
-        sameSite: true,
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-      },
-    }),
-  )
-
-  const corsOptions = { credentials: true, origin: '*' }
-  graphqlServer.applyMiddleware({ app, cors: corsOptions, path: '/graphql' })
-
-  return app
-}

@@ -1,42 +1,84 @@
 import axios from 'axios'
-import { ApolloExpressServer } from '../startApolloServer';
-import { AddressInfo } from '../types/server-utils';
-import { Server } from 'http';
+import { StartApolloExpressServer } from '../startApolloServer'
+import { Server } from 'http'
+import axiosCookieJarSupport from 'axios-cookiejar-support'
+import tough from 'tough-cookie'
 
-let HOST_URL: string
+axiosCookieJarSupport(axios)
+const cookieJar = new tough.CookieJar()
+
+// const httpAgent = new Agent({ keepAlive: true })
+let REQUEST_URL: string
 let server: Server
-
+jest.setTimeout(3 * 60 * 1000)
 const urlQuery = `
 	{
 		url
 	}
 `
-beforeAll(async () => {
-	server = await ApolloExpressServer().listen(0, 'localhost', () => {
-		HOST_URL = 'http://127.0.0.1:' + (server.address() as AddressInfo).port + '/graphql'
-		console.log(HOST_URL)
-	})
-});
 
-afterAll(() => {
-	server.close
+const setSession = `
+	mutation {
+		setSessionDummy1
+	}
+`
+
+const readSession = `
+	query {
+  	readSessionDummy1
+  	readSessionDummy2
+	}
+`
+
+beforeAll(async () => {
+  server = await StartApolloExpressServer()
+  if (process.env.HOST_URL)
+    REQUEST_URL = 'http://' + process.env.HOST_URL + '/graphql'
 })
 
-describe('making requests with axios', () => {
-	it('makes a url query call', async () => {
-		const response = await axios.post(
-			HOST_URL,
-			{
-				query: urlQuery
-			},
-			{
-				withCredentials: true
-			}
-		).catch((error: any) => {
-			console.log(error)
-		})
-		if (response) {
-			expect(response.data.data.url).toEqual('127.0.0.1:3000')
-		}		
-	})
+afterAll(() => {
+  if (server) server.close()
+})
+
+describe('axios tests', () => {
+  it('makes a url query call', async () => {
+    const response = await axios
+      .post(
+        REQUEST_URL,
+        {
+          query: urlQuery,
+        },
+        {
+          withCredentials: true,
+          jar: cookieJar,
+        },
+      )
+      .catch((error: any) => {
+        console.log(error)
+      })
+    expect((response as any).data.data.url).toEqual(process.env.HOST_URL)
+  })
+
+  it('sets session', async () => {
+    const setResponse: any = await axios
+      .post(
+        REQUEST_URL,
+        { query: setSession },
+        { withCredentials: true, jar: cookieJar},
+      )
+      .catch((e: any) => console.log(e))
+
+    expect(typeof setResponse.data.data.setSessionDummy1).toBe('string')
+  })
+
+  it('reads session', async () => {
+    const readResponse: any = await axios
+      .post(
+        REQUEST_URL,
+        { query: readSession },
+        { withCredentials: true, jar: cookieJar },
+      )
+      .catch((e: any) => console.log(e))
+    expect(readResponse.data.data.readSessionDummy1).toBe('true')
+  })
 })

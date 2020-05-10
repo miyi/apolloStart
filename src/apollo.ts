@@ -1,6 +1,4 @@
-import { ApolloExpressServer } from './startApolloServer';
+import { StartApolloExpressServer } from './startApolloServer';
 
-ApolloExpressServer().listen(3000, 'localhost', () => {
-	console.log(`server listening on port 3000`)
-})
+StartApolloExpressServer(3000)
 
