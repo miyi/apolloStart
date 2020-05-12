@@ -1,11 +1,11 @@
 import axios from 'axios'
 import { StartApolloExpressServer } from '../startApolloServer'
 import { Server } from 'http'
-import axiosCookieJarSupport from 'axios-cookiejar-support'
-import tough from 'tough-cookie'
+// import axiosCookieJarSupport from 'axios-cookiejar-support'
+// import tough from 'tough-cookie'
 
-axiosCookieJarSupport(axios)
-const cookieJar = new tough.CookieJar()
+// axiosCookieJarSupport(axios)
+// const cookieJar = new tough.CookieJar()
 
 // const httpAgent = new Agent({ keepAlive: true })
 let REQUEST_URL: string
@@ -50,7 +50,7 @@ describe('axios tests', () => {
         },
         {
           withCredentials: true,
-          jar: cookieJar,
+          // jar: cookieJar,
         },
       )
       .catch((error: any) => {
@@ -64,7 +64,9 @@ describe('axios tests', () => {
       .post(
         REQUEST_URL,
         { query: setSession },
-        { withCredentials: true, jar: cookieJar},
+        { withCredentials: true, 
+          // jar: cookieJar 
+        },
       )
       .catch((e: any) => console.log(e))
 
@@ -76,7 +78,9 @@ describe('axios tests', () => {
       .post(
         REQUEST_URL,
         { query: readSession },
-        { withCredentials: true, jar: cookieJar },
+        { withCredentials: true, 
+          // jar: cookieJar 
+        },
       )
       .catch((e: any) => console.log(e))
     expect(readResponse.data.data.readSessionDummy1).toBe('true')

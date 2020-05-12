@@ -1,4 +1,3 @@
-import { StartApolloExpressServer } from './startApolloServer';
+import { StartApolloExpressServer } from './startApolloServer'
 
 StartApolloExpressServer(3000)
-
