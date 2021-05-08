@@ -23,7 +23,7 @@
     "reflect-metadata": "^0.1.13",
     "tough-cookie": "^4.0.0",
     "tsc": "^1.20150623.0",
-    "typeorm": "^0.2.24"
+    "typeorm": "^0.2.25"
   },
   "scripts": {
     "apollo-start": "NODE_ENV=development nodemon src/apollo.ts",
